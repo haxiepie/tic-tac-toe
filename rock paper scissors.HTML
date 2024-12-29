@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="./styles.css"> 
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #333; /* Darker background color */
+            font-family: Arial, sans-serif;
+        }
+        .turn-indicator {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #fff; /* White text color */
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            transition: background-color 0.3s, transform 0.3s; /* Add transition for animation */
+        }
+        .cell:hover {
+            background-color: #e0f7fa; /* Change background color on hover */
+            transform: scale(1.1); /* Slightly enlarge on hover */
+        }
+        .play-again {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .play-again:hover {
+            background-color: #0056b3;
+        }
+        .highlight {
+            background-color: #00ff00 !important; /* Highlight winning cells in green */
+        }
+        .alert-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="turn-indicator" id="turnIndicator">X's turn</div>
+    <div class="board" id="board">
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+    </div>
+    <button class="play-again" id="playAgainButton">Play Again</button>
+    <div id="alertContainer"></div>
+
+    <script>
+        const board = document.getElementById('board');
+        const cells = document.querySelectorAll('[data-cell]');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const alertContainer = document.getElementById('alertContainer');
+        let isXTurn = true;
+
+        const handleClick = (e) => {
+            const cell = e.target;
+            const currentClass = isXTurn ? 'X' : 'O';
+            placeMark(cell, currentClass);
+            if (checkWin(currentClass)) {
+                highlightWinningCells(currentClass);
+                setTimeout(() => showAlert(`${currentClass} wins!`), 10);
+                endGame();
+            } else if (isDraw()) {
+                setTimeout(() => showAlert('Draw!'), 10);
+                endGame();
+            } else {
+                swapTurns();
+            }
+        };
+
+        const placeMark = (cell, currentClass) => {
+            cell.textContent = currentClass;
+        };
+
+        const swapTurns = () => {
+            isXTurn = !isXTurn;
+            turnIndicator.textContent = isXTurn ? "X's turn" : "O's turn";
+        };
+
+        const checkWin = (currentClass) => {
+            const winningCombinations = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            return winningCombinations.some(combination => {
+                return combination.every(index => {
+                    return cells[index].textContent === currentClass;
+                });
+            });
+        };
+
+        const highlightWinningCells = (currentClass) => {
+            const winningCombinations = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            winningCombinations.forEach(combination => {
+                if (combination.every(index => cells[index].textContent === currentClass)) {
+                    combination.forEach(index => {
+                        cells[index].classList.add('highlight');
+                    });
+                }
+            });
+        };
+
+        const isDraw = () => {
+            return [...cells].every(cell => {
+                return cell.textContent === 'X' || cell.textContent === 'O';
+            });
+        };
+
+        const resetBoard = () => {
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('highlight');
+            });
+            isXTurn = true;
+            turnIndicator.textContent = "X's turn";
+            playAgainButton.style.display = 'none';
+            alertContainer.innerHTML = '';
+            cells.forEach(cell => {
+                cell.addEventListener('click', handleClick, { once: true });
+            });
+        };
+
+        const endGame = () => {
+            playAgainButton.style.display = 'block';
+        };
+
+        const showAlert = (message) => {
+            const alertBox = document.createElement('div');
+            alertBox.textContent = message;
+            alertBox.className = 'alert-box';
+            alertContainer.appendChild(alertBox);
+            setTimeout(() => {
+                alertContainer.removeChild(alertBox);
+            }, 2000);
+        };
+
+        playAgainButton.addEventListener('click', resetBoard);
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleClick, { once: true });
+        });
+    </script>
+</body>
+</html>
