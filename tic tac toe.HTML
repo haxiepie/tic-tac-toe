@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe</title>
-    <link rel="stylesheet" href="./styles.css"> 
+    <link rel="stylesheet" href="./styles.css"/> 
     <style>
         body {
             display: flex;
@@ -180,6 +180,9 @@
 
         const endGame = () => {
             playAgainButton.style.display = 'block';
+            cells.forEach(cell => {
+                cell.removeEventListener('click', handleClick);
+            });
         };
 
         const showAlert = (message) => {
@@ -200,3 +203,5 @@
     </script>
 </body>
 </html>
+
+<div class="mode-selector" style="margin-bottom: 20px;"></div>
